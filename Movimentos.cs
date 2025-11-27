@@ -3,12 +3,13 @@ using UnityEngine;
 public class Movimentos : MonoBehaviour
 {
     [Header("Velocidades")]
-    public float forwardSpeed = 10f;
     public float laneSpeed = 10f;
 
     [Header("Lanes")]
-    public float laneOffset = 3f;   // distância entre as faixas
-    private int currentLane = 0;    // 0 = centro, -1 = esquerda, +1 = direita
+    public float laneOffset = 3f;   
+    private int currentLane = 0;    
+
+    private float initialX;
 
     private Vector3 targetPosition;
 
@@ -16,11 +17,14 @@ public class Movimentos : MonoBehaviour
     [HideInInspector] public bool moveLeftPressed = false;
     [HideInInspector] public bool moveRightPressed = false;
 
+    void Start()
+    {
+        initialX = transform.position.x;
+        targetPosition = transform.position;
+    }
+
     void Update()
     {
-        // Movimento automático para frente
-        transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime);
-
         // INPUT DO TECLADO
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             MoveLeft();
@@ -32,8 +36,10 @@ public class Movimentos : MonoBehaviour
         if (moveLeftPressed) MoveLeft();
         if (moveRightPressed) MoveRight();
 
-        // Calculando a posição alvo da faixa (lane)
-        targetPosition = new Vector3(currentLane * laneOffset, transform.position.y, transform.position.z);
+        float targetX = initialX + (currentLane * laneOffset);
+
+        // Calculando a posição alvo da faixa
+        targetPosition = new Vector3(targetX, transform.position.y, transform.position.z);
 
         // Mover suavemente até a faixa
         transform.position = Vector3.Lerp(transform.position, targetPosition, laneSpeed * Time.deltaTime);
@@ -41,17 +47,17 @@ public class Movimentos : MonoBehaviour
 
     public void MoveLeft()
     {
-        if (currentLane > -1) // limite esquerda
+        if (currentLane > -1) 
             currentLane--;
     }
 
     public void MoveRight()
     {
-        if (currentLane < 1) // limite direita
+        if (currentLane < 1) 
             currentLane++;
     }
 
-    // Chamados por botões da UI
+    // Chamados pela UI
     public void OnLeftButtonDown()  { moveLeftPressed = true; }
     public void OnLeftButtonUp()    { moveLeftPressed = false; }
 
