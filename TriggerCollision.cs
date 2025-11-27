@@ -11,12 +11,14 @@ public class TriggerCollision : MonoBehaviour
     public float[] roads;
     public Vector2 obstacleStartPosition;
     public bool buildOrDestroy;
-
+    private bool hasTriggered = false;
     private void OnTriggerEnter(Collider other)
     {
+        if (hasTriggered) return;
         
         if (other.gameObject.CompareTag("Player"))
         {
+            hasTriggered = true;
             if (buildOrDestroy)
             {
                 Vector3 novaPosicao = startPosition; 
