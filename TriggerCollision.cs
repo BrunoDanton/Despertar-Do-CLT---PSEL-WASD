@@ -6,10 +6,12 @@ public class TriggerCollision : MonoBehaviour
     public GameObject roadPrefab; 
     public GameObject[] obstaclePrefabs;
     public GameObject[] jumpablePrefabs;
+    public Collectable[] collectables;
 
     public Vector3 startPosition = new Vector3 (0, 0, 0);
     public float[] roads;
     public Vector2 obstacleStartPosition;
+    public Vector2 collectableStartPosition;
     public bool buildOrDestroy;
     private bool hasTriggered = false;
     private void OnTriggerEnter(Collider other)
@@ -27,11 +29,19 @@ public class TriggerCollision : MonoBehaviour
 
                 AddObstaclesV2 addObstacles = road.AddComponent<AddObstaclesV2>();
 
+                AddCollectables addCollectables = road.AddComponent<AddCollectables>();
+
+                if (addCollectables == null)
+                {
+                    addCollectables = road.AddComponent<AddCollectables>();
+                }
+
                 if (addObstacles == null) 
                 {
                     addObstacles = road.AddComponent<AddObstaclesV2>();
                 }
 
+                addCollectables.Create(collectables, roads, roadLength, collectableStartPosition);
                 addObstacles.Create(obstaclePrefabs, roads, roadLength, obstacleStartPosition, jumpablePrefabs); 
             }
             else
