@@ -17,10 +17,17 @@ public class Movimentos : MonoBehaviour
     [HideInInspector] public bool moveLeftPressed = false;
     [HideInInspector] public bool moveRightPressed = false;
 
+    [Header("Pulo")]
+    public float jumpForce = 7f;
+    public LayerMask groundLayer;
+    private bool isGrounded = false;
+    private Rigidbody rb;
+
     void Start()
     {
         initialX = transform.position.x;
         targetPosition = transform.position;
+        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -31,6 +38,10 @@ public class Movimentos : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             MoveRight();
+
+        //PULO
+       if (Input.GetKeyDown(KeyCode.Space))
+            Jump();
 
         // INPUT POR BOTÕES (pressionar e segurar)
         if (moveLeftPressed) MoveLeft();
@@ -43,6 +54,9 @@ public class Movimentos : MonoBehaviour
 
         // Mover suavemente até a faixa
         transform.position = Vector3.Lerp(transform.position, targetPosition, laneSpeed * Time.deltaTime);
+
+        //Detecção do chão 
+        CheckGround();
     }
 
     public void MoveLeft()
@@ -57,6 +71,26 @@ public class Movimentos : MonoBehaviour
             currentLane++;
     }
 
+   //PULO
+   public void Jump()
+    {
+        if (isGrounded == true)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+    }
+
+    //Detecção do chão 
+   void CheckGround()
+    {
+        Ray ray = new Ray(transform.position, Vector3.down);
+
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, 1.1f, groundLayer))
+            isGrounded = true;
+        else
+            isGrounded = false;
+    }
+
     // Chamados pela UI
     public void OnLeftButtonDown()  { moveLeftPressed = true; }
     public void OnLeftButtonUp()    { moveLeftPressed = false; }
@@ -64,3 +98,4 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
+
