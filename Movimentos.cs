@@ -7,7 +7,9 @@ public class Movimentos : MonoBehaviour
 
     [Header("Lanes")]
     public float laneOffset = 3f;   
-    private int currentLane = 0;    
+    public int currentLane = 0;    
+    public int previousLane = 0;
+    public bool isChangingLanes = false;
 
     private float initialX;
 
@@ -22,7 +24,7 @@ public class Movimentos : MonoBehaviour
     public LayerMask groundLayer;
     private bool isGrounded = false;
     private Rigidbody rb;
-
+    
     void Start()
     {
         initialX = transform.position.x;
@@ -31,7 +33,7 @@ public class Movimentos : MonoBehaviour
     }
 
     void Update()
-    {
+    {     
         // INPUT DO TECLADO
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             MoveLeft();
@@ -40,7 +42,7 @@ public class Movimentos : MonoBehaviour
             MoveRight();
 
         //PULO
-       if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             Jump();
 
         // INPUT POR BOTÕES (pressionar e segurar)
@@ -57,31 +59,46 @@ public class Movimentos : MonoBehaviour
 
         //Detecção do chão 
         CheckGround();
+
+        float distanceToTarget = Mathf.Abs(transform.position.x - targetX);
+    
+        // Se a distância for maior que a tolerância (ex: 0.01), ainda está mudando.
+        if (distanceToTarget > 0.01f) 
+        {
+            isChangingLanes = true;
+        }
+        else
+        {
+            isChangingLanes = false;
+            transform.position = new Vector3(targetX, transform.position.y, transform.position.z);
+        }
     }
 
     public void MoveLeft()
     {
+        previousLane = currentLane;
         if (currentLane > -1) 
             currentLane--;
     }
 
     public void MoveRight()
     {
+        previousLane = currentLane;
         if (currentLane < 1) 
             currentLane++;
     }
 
-   //PULO
-   public void Jump()
+    //PULO
+    public void Jump()
     {
-        if (isGrounded == true)
+        if (isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
 
     //Detecção do chão 
-   void CheckGround()
+    void CheckGround()
     {
         Ray ray = new Ray(transform.position, Vector3.down);
 
@@ -98,4 +115,3 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
-
