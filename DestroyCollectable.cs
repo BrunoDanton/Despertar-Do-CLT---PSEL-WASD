@@ -11,6 +11,7 @@ public class DestroyCollectable : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
+            TempoRestante.incrementaTempo();
             Destroy(transform.gameObject);
         }
     }
