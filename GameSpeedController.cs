@@ -13,5 +13,10 @@ public class GameSpeedController : MonoBehaviour
         {
             RoadMovement.globalVelocity -= 0.1f * Time.deltaTime; 
         }
+
+        if (TempoRestante.incremento >= 1)
+        {
+            TempoRestante.incremento -= 0.03f * Time.deltaTime;
+        }
     }
 }
