@@ -31,7 +31,7 @@ public class Movimentos : MonoBehaviour
     private AudioSource audioSource;
 
     [Header("Recuperação")]
-    private bool TáCaindo = false;
+    private bool TaCaindo = false;
     public float recup = 7f;
 
     void Start()
@@ -57,7 +57,7 @@ public class Movimentos : MonoBehaviour
 
         //Descida
         if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            Recuperaçãos();
+            Recuperação();
 
         // INPUT POR BOTÕES (pressionar e segurar)
         if (moveLeftPressed) MoveLeft();
@@ -142,14 +142,12 @@ public class Movimentos : MonoBehaviour
     }
 
     void Caindo(){
-        if(!isGrounded){
-            if(TáCaindo){
-                TáCaindo = true;
-                Recuperação();
-            }
+        if(!isGrounded && rb.linearVelocity.y < 0){
+            TaCaindo = true;
         }
-        else{
-            TáCaindo = false;
+        else
+        {
+            TaCaindo = false;
         }
     }
 
@@ -164,4 +162,5 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
+
 
