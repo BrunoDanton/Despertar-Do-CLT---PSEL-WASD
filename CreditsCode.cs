@@ -6,6 +6,7 @@ public class Creditos : MonoBehaviour
   private Button startButton;
   private Button creditsButton;
   public GameObject Fundo;
+  public GameObject Credit;
   
   void OnEnable()
   {
@@ -30,5 +31,7 @@ public class Creditos : MonoBehaviour
     startButton.style.display = DisplayStyle.None;
     creditsButton.style.display = DisplayStyle.None;
     Fundo.SetActive(false);
+    //Deixa o GameObject dos creditos desativado
+    Credit.SetActive(true);
   }
 }
