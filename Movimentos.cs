@@ -34,16 +34,35 @@ public class Movimentos : MonoBehaviour
     private bool TaCaindo = false;
     public float recup = 7f;
 
+    public UIDocument uiDocument;
+    private Button startButton;
+    private float j = 0;
+
     void Start()
     {
         initialX = transform.position.x;
         targetPosition = transform.position;
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+        startButton = uiDocument.rootVisualElement.Q<Button>("startButton);
+        startButton.style.display = DisplayStyle.Flex;
+        startButton.clicked += () =>
+        {
+            j = 1;
+        };
     }
 
     void Update()
     {     
+        while (j == 0)
+        {
+            if (j == 1)
+            {
+                startButton.style.display = DisplayStyle.Flex;
+                break;
+            }
+            return;
+        }
         // INPUT DO TECLADO
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             MoveLeft();
@@ -162,5 +181,6 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
+
 
 
