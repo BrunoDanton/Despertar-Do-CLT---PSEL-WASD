@@ -8,12 +8,9 @@ public class Movimentos : MonoBehaviour
     [Header("Lanes")]
     public float laneOffset = 3f;   
     public int currentLane = 0;    
-    public int previousLane = 0;
-    public bool isChangingLanes = false;
-
-    private float initialX;
-
-    private Vector3 targetPosition;
+    public float maxStepsVolume;
+    [HideInInspector] public int previousLane = 0;
+    [HideInInspector] public bool isChangingLanes = false;
 
     // Controle por botões da tela
     [HideInInspector] public bool moveLeftPressed = false;
@@ -22,133 +19,134 @@ public class Movimentos : MonoBehaviour
     [Header("Pulo")]
     public float jumpForce = 7f;
     public LayerMask groundLayer;
-    public float groundCheckDistance = 0.2f; // Distância menor e ajustável
-    public Vector3 groundCheckOffset = new Vector3(0, 0.1f, 0); // Offset do ponto de origem do raycast
+    public float groundCheckDistance = 0.2f;
+    public Vector3 groundCheckOffset = new Vector3(0, 0.1f, 0); 
     
     private bool isGrounded = false;
-    private bool canJump = true; // Nova variável para controlar pulo duplo
+    private bool canJump = true; 
     private Rigidbody rb;
     private AudioSource audioSource;
+    private Transform _transform; // Cache do Transform
 
+    private float initialX;
+    
+    // Novas variáveis para a mecânica de descida/recuperação
     [Header("Recuperação")]
-    private bool TaCaindo = false;
-    public float recup = 7f;
-
-    public UIDocument uiDocument;
-    private Button startButton;
-    private float j = 0;
+    public float recupForce = 15f; // Força aplicada para descer rapidamente
 
     void Start()
     {
-        initialX = transform.position.x;
-        targetPosition = transform.position;
+        _transform = transform; // Cache do Transform
+        initialX = _transform.position.x;
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
-        startButton = uiDocument.rootVisualElement.Q<Button>("startButton);
-        startButton.style.display = DisplayStyle.Flex;
-        startButton.clicked += () =>
-        {
-            j = 1;
-        };
     }
 
     void Update()
     {     
-        while (j == 0)
-        {
-            if (j == 1)
-            {
-                startButton.style.display = DisplayStyle.Flex;
-                break;
-            }
-            return;
-        }
-        // INPUT DO TECLADO
+        // inputs
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             MoveLeft();
 
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             MoveRight();
 
-        //PULO
+        // PULO
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             Jump();
 
-        //Descida
+        // DESCIDA / RECUPERAÇÃO
         if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            Recuperação();
+            Recuperacao();
 
-        // INPUT POR BOTÕES (pressionar e segurar)
+        // INPUT POR BOTÕES
         if (moveLeftPressed) MoveLeft();
         if (moveRightPressed) MoveRight();
 
         float targetX = initialX + (currentLane * laneOffset);
-
-        // Calculando a posição alvo da faixa
-        targetPosition = new Vector3(targetX, transform.position.y, transform.position.z);
+        
+        // Otimização: Cria a posição alvo completa
+        Vector3 targetPosition = new Vector3(targetX, _transform.position.y, _transform.position.z);
 
         // Mover suavemente até a faixa
-        transform.position = Vector3.Lerp(transform.position, targetPosition, laneSpeed * Time.deltaTime);
+        _transform.position = Vector3.Lerp(_transform.position, targetPosition, laneSpeed * Time.deltaTime);
 
-        //Detecção do chão 
+        // Detecção do chão 
         CheckGround();
 
-        //Detecção se estar no ar ou pulou
-        Caindo();
+        // Otimização: Usa Mathf.Approximately para comparar floats com precisão
+        float distanceToTargetX = Mathf.Abs(_transform.position.x - targetX);
+        float tolerance = 0.05f;
 
-        float distanceToTarget = Mathf.Abs(transform.position.x - targetX);
-    
-        // Se a distância for maior que a tolerância (ex: 0.01), ainda está mudando.
-        // Use um valor pequeno como 0.01f ou Vector3.kEpsilon.
-        if (distanceToTarget > 0.01f) 
-        {
-            isChangingLanes = true;
-        }
-        else
+        // Se o jogador está na posição alvo (dentro da tolerância), a mudança de faixa terminou.
+        if (distanceToTargetX <= tolerance) 
         {
             isChangingLanes = false;
-            // Opcional: Força a posição exata para evitar qualquer erro de float
-            transform.position = new Vector3(targetX, transform.position.y, transform.position.z);
+            // Otimização: Força a posição X exata para garantir que não haja desvios
+            _transform.position = targetPosition; 
+        }
+
+        Debug.Log("Is Changing Lanes = " + isChangingLanes);
+        // Otimização: Evita desvios de rotação no player.
+        if (transform.rotation !=  Quaternion.Euler(new Vector3 (0, 180, 0)))
+        {
+            transform.rotation = Quaternion.Euler(new Vector3 (0, 180, 0));
         }
     }
 
     public void MoveLeft()
     {
-        previousLane = currentLane;
+        // Verifica se já está na faixa mais à esquerda (1)
         if (currentLane > -1) 
+        {
+            previousLane = currentLane;
             currentLane--;
+            isChangingLanes = true;
+        }
     }
 
     public void MoveRight()
     {
-        previousLane = currentLane;
+        // Verifica se já está na faixa mais à direita (+1)
         if (currentLane < 1) 
+        {
+            previousLane = currentLane;
             currentLane++;
+            isChangingLanes = true;
+        }
     }
 
-    //PULO
+    // PULO
     public void Jump()
     {
         if (isGrounded && canJump)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            canJump = false; // Impede pulo duplo
-            isGrounded = false; // Força o estado de não estar no chão
+            canJump = false; 
+            isGrounded = false; 
         }
     }
+    
+    // Recuperação de altura no pulo
+    public void Recuperacao()
+    {
+        // Aplica uma força para baixo
+        rb.AddForce(Vector3.down * recupForce, ForceMode.Impulse);
+    }
 
-    //Detecção do chão 
+
+    // Detecção do chão 
     void CheckGround()
     {
-        // Lança o raio de um ponto ligeiramente acima do centro do personagem
-        Vector3 rayOrigin = transform.position + groundCheckOffset;
-        Ray ray = new Ray(rayOrigin, Vector3.down);
-
-        if (Physics.Raycast(ray, out RaycastHit hitInfo, groundCheckDistance, groundLayer))
+        // Lança o raio do cache do transform
+        Vector3 rayOrigin = _transform.position + groundCheckOffset;
+        
+        // Raycast sem alocação de memória (melhor que criar um 'new Ray')
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, groundLayer))
         {
             isGrounded = true;
-            audioSource.volume = 1;
-            canJump = true; // Permite pular novamente quando tocar o chão
+            audioSource.volume = maxStepsVolume;
+            canJump = true; 
         }
         else
         {
@@ -156,22 +154,7 @@ public class Movimentos : MonoBehaviour
             audioSource.volume = 0;
         }
         
-        // Visualizar o raio no Editor (opcional, remova em produção)
-        Debug.DrawRay(rayOrigin, Vector3.down * groundCheckDistance, isGrounded ? Color.green : Color.red);
-    }
-
-    void Caindo(){
-        if(!isGrounded && rb.linearVelocity.y < 0){
-            TaCaindo = true;
-        }
-        else
-        {
-            TaCaindo = false;
-        }
-    }
-
-    public void Recuperação(){
-        rb.AddForce(Vector3.down * recup, ForceMode.Impulse);
+        // Debug.DrawRay(rayOrigin, Vector3.down * groundCheckDistance, isGrounded ? Color.green : Color.red);
     }
 
     // Chamados pela UI
@@ -181,6 +164,3 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
-
-
-
