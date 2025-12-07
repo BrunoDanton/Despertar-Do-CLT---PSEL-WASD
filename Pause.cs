@@ -17,6 +17,10 @@ public class Pause : MonoBehaviour
     returnButton = root.Q<Button>("returnButton");
     menuButton = root.Q<Button>("menuButton");
 
+    pauseButton.style.display = DisplayStyle.Flex;
+    returnButton.style.display = DisplayStyle.None;
+    menuButton.style.display = DisplayStyle.None;
+
     pauseButton.clicked -= PauseGame;
     returnButton.clicked -= ReturnGame;
     menuButton.clicked -= MenuGame;
