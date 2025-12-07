@@ -34,16 +34,53 @@ public class Movimentos : MonoBehaviour
     [Header("Recuperação")]
     public float recupForce = 15f; // Força aplicada para descer rapidamente
 
+    public UIDocument uiDocument;
+    private Button pauseButton;
+    private Button returnButton;
+    private Button menuButton;
+    private float p = 2;
+
     void Start()
     {
         _transform = transform; // Cache do Transform
         initialX = _transform.position.x;
         rb = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+
+        pauseButton = uiDocument.rootVisualElement.Q<Button>("pauseButton");
+        returnButton = uiDocument.rootVisualElement.Q<Button>("returnButton");
+        menuButton = uiDocument.rootVisualElement.Q<Button>("menuButton");
+
+        pauseButton.style.display = DisplayStyle.Flex;
+        returnButton.style.display = DisplayStyle.None;
+        menuButton.style.display = DisplayStyle.None;
+
+        pauseButton.clicked += () =>
+        {
+            p = 0;
+        }
+        returnButton.clicked += () =>
+        {
+            p = 1;
+        }
     }
 
     void Update()
     {     
+        if (p == 0)
+        {
+            pauseButton.style.display = DisplayStyle.None;
+            returnButton.style.display = DisplayStyle.Flex;
+            menuButton.style.display = DisplayStyle.Flex;
+            return;
+        }
+        else if (p == 1)
+        {
+            pauseButton.style.display = DisplayStyle.Flex;
+            returnButton.style.display = DisplayStyle.None;
+            menuButton.style.display = DisplayStyle.None;
+        }
+        
         // inputs
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             MoveLeft();
@@ -164,3 +201,4 @@ public class Movimentos : MonoBehaviour
     public void OnRightButtonDown() { moveRightPressed = true; }
     public void OnRightButtonUp()   { moveRightPressed = false; }
 }
+
