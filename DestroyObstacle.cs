@@ -6,7 +6,8 @@ public class DestroyObstacle : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Trigger"))
         {
-            Destroy(transform.gameObject);
+            // Destrói o objeto no qual este script está anexado
+            Destroy(gameObject); 
         }
     }
 }
