@@ -1,4 +1,3 @@
-// TriggerCollision.cs
 using UnityEngine;
 
 public class TriggerCollision : MonoBehaviour
@@ -14,40 +13,32 @@ public class TriggerCollision : MonoBehaviour
     public Vector2 collectableStartPosition;
     public bool buildOrDestroy;
     private bool hasTriggered = false;
+    
     private void OnTriggerEnter(Collider other)
     {
-        if (hasTriggered) return;
+        // Verifica se já foi ativado ou se não é o Player
+        if (hasTriggered || !other.gameObject.CompareTag("Player")) return;
         
-        if (other.gameObject.CompareTag("Player"))
+        hasTriggered = true;
+        
+        if (buildOrDestroy)
         {
-            hasTriggered = true;
-            if (buildOrDestroy)
-            {
-                Vector3 novaPosicao = startPosition; 
-                GameObject road = Instantiate(roadPrefab, novaPosicao, Quaternion.identity);
-                float roadLength = 100f;
+            // Cria a estrada e a configura
+            Vector3 novaPosicao = startPosition; 
+            GameObject road = Instantiate(roadPrefab, novaPosicao, Quaternion.identity);
+            float roadLength = 100f;
 
-                AddObstaclesV2 addObstacles = road.AddComponent<AddObstaclesV2>();
-
-                AddCollectables addCollectables = road.AddComponent<AddCollectables>();
-
-                if (addCollectables == null)
-                {
-                    addCollectables = road.AddComponent<AddCollectables>();
-                }
-
-                if (addObstacles == null) 
-                {
-                    addObstacles = road.AddComponent<AddObstaclesV2>();
-                }
-
-                addCollectables.Create(collectables, roads, roadLength, collectableStartPosition);
-                addObstacles.Create(obstaclePrefabs, roads, roadLength, obstacleStartPosition, jumpablePrefabs); 
-            }
-            else
-            {
-                Destroy(transform.parent.gameObject);
-            }
+            // Adiciona e armazena os componentes de uma vez
+            AddObstaclesV2 addObstacles = road.AddComponent<AddObstaclesV2>();
+            AddCollectables addCollectables = road.AddComponent<AddCollectables>();
+            
+            addCollectables.Create(collectables, roads, roadLength, collectableStartPosition);
+            addObstacles.Create(obstaclePrefabs, roads, roadLength, obstacleStartPosition, jumpablePrefabs); 
+        }
+        else
+        {
+            // Destroi o objeto pai, que é a estrada anterior
+            Destroy(transform.parent.gameObject);
         }
     }
 }
