@@ -31,6 +31,7 @@ public class Pause : MonoBehaviour
     pauseButton.style.display = DisplayStyle.None;
     returnButton.style.display = DisplayStyle.Flex;
     menuButton.style.display = DisplayStyle.Flex;
+    Time.timeScale = 0f;
   }
   
   void ReturnGame()
@@ -38,6 +39,7 @@ public class Pause : MonoBehaviour
     pauseButton.style.display = DisplayStyle.Flex;
     returnButton.style.display = DisplayStyle.None;
     menuButton.style.display = DisplayStyle.None;
+    Time.timeScale = 1f;
   }
   
   void MenuGame()
